@@ -373,8 +373,76 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
   });
 });
 
+// ── FORMULARI INSCRIPCIONS ─────────────────────────────────
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwS0XTlCO2gwypYkbzho0i5CmnFT54FisTGbVlQ1faTtA2iYgTkqMrznfG8yLYObr1FjA/exec";
+
+function llegirFitxerBase64(fitxer) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(fitxer);
+  });
+}
+
 // ── INIT ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   renderTeams();
   setTimeout(initScrollAnimations, 60);
+
+  const form = document.getElementById('inscripcioForm');
+  if (form) {
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const btn = document.getElementById('submitBtn');
+      const missatge = document.getElementById('formMissatge');
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviant...';
+      missatge.style.display = 'none';
+
+      const formData = new FormData(this);
+      const datos = {
+        Nom: formData.get('nom'),
+        Cognoms: formData.get('cognoms'),
+        DNI: formData.get('dni'),
+        'Data de Naixement': formData.get('data_naixement')
+      };
+
+      const fitxer = document.getElementById('comprovant').files[0];
+      if (fitxer) {
+        datos.arxiu_base64 = await llegirFitxerBase64(fitxer);
+        datos.arxiu_nom = fitxer.name;
+        datos.arxiu_tipus = fitxer.type;
+      }
+
+      try {
+        await fetch(URL_SCRIPT, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify(datos)
+        });
+
+        missatge.style.display = 'block';
+        missatge.style.color = '#2ecc71';
+        missatge.innerHTML = '✅ Inscripció enviada correctament! Ens posarem en contacte amb tu prompte.';
+        this.reset();
+        const fileLabel = document.getElementById('fileLabel');
+        if (fileLabel) {
+          fileLabel.querySelector('.file-upload-text').textContent = "Fes clic per adjuntar l'arxiu";
+          fileLabel.querySelector('i').className = 'fas fa-cloud-upload-alt';
+          fileLabel.classList.remove('has-file');
+        }
+
+      } catch (err) {
+        missatge.style.display = 'block';
+        missatge.style.color = '#e74c3c';
+        missatge.innerHTML = '❌ Error en enviar. Torna-ho a intentar o contacta\'ns per correu.';
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Inscripció';
+    });
+  }
 });
