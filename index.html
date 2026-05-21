@@ -382,9 +382,7 @@
           </div>
         </div>
         <div class="inscripcions-form-wrap reveal">
-          <form name="inscripcio" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="inscripcio-form">
-            <input type="hidden" name="form-name" value="inscripcio">
-            <p style="display:none"><label>No ompliu: <input name="bot-field"></label></p>
+          <form id="inscripcioForm" class="inscripcio-form" action="javascript:void(0)">
 
             <div class="form-group">
               <label for="nom"><i class="fas fa-user"></i> Nom del Jugador/a</label>
@@ -417,10 +415,12 @@
               <input type="file" id="comprovant" name="comprovant" accept="image/*,.pdf" required style="display:none">
             </div>
 
-            <button type="submit" class="inscripcio-btn">
+            <button type="submit" class="inscripcio-btn" id="submitBtn">
               <i class="fas fa-paper-plane"></i> Enviar Inscripció
             </button>
+            <p id="formMissatge" style="display:none; margin-top:1rem; font-weight:600; text-align:center;"></p>
           </form>
+
         </div>
       </div>
     </div>
